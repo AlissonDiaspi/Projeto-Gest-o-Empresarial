@@ -7,11 +7,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
 
-  createdAt DateTime @default(now())
+model User {
+  id          String        @id @default(uuid())
+  name        String
+  email       String        @unique
+  password    String
+
+  memberships Membership[]
+
+  auditLogs   AuditLog[]
+
+  createdAt   DateTime      @default(now())
+}
+
+model Organization {
+  id          String        @id @default(uuid())
+  name        String
+
+  memberships Membership[]
+
+  auditLogs   AuditLog[]
+
+  createdAt   DateTime      @default(now())
+}
+
+model Membership {
+  id             String        @id @default(uuid())
+
+  userId         String
+  organizationId String
+
+  role           Role          @default(MEMBER)
+
+  user           User          @relation(fields: [userId], references: [id])
+
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  createdAt      DateTime      @default(now())
+
+  @@unique([userId, organizationId])
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+
+  action         String
+  description    String
+
+  actorId        String
+  organizationId String
+
+  actor          User         @relation(fields: [actorId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  createdAt      DateTime @default(now())
 }
