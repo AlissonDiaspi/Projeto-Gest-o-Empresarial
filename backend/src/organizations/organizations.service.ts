@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -59,8 +63,10 @@ export class OrganizationsService {
         },
       });
 
-    if (!user) { // se não encontrar
-      throw new Error('User not found');
+    if (!user) { // se não encontrar, lança exceção 404
+      throw new NotFoundException(
+        'Usuário não encontrado',
+      );
     }
 
     const membershipExists =
@@ -71,9 +77,9 @@ export class OrganizationsService {
         },
       });
 
-    if (membershipExists) {
-      throw new Error(
-        'User already in organization',
+    if (membershipExists) { // se o usuário já estiver na organização, lança exceção 400
+      throw new BadRequestException(
+        'Usuário já pertence à organização',
       );
     }
 
@@ -129,8 +135,10 @@ export class OrganizationsService {
         },
       });
 
-    if (!membership) { // se não achar, lança esse erro
-      throw new Error('Membership not found');
+    if (!membership) { // se não achar, lança exceção 404
+      throw new NotFoundException(
+        'Membro não encontrado',
+      );
     }
 
     return this.prisma.membership.update({ // atualiza o usuário com a role
@@ -156,8 +164,10 @@ export class OrganizationsService {
         },
       });
 
-    if (!membership) { // se o membro não for encontrado, lança esse erro
-      throw new Error('Membership not found');
+    if (!membership) { // se o membro não for encontrado, lança exceção 404
+      throw new NotFoundException(
+        'Membro não encontrado',
+      );
     }
 
     return this.prisma.membership.delete({ // deleta o membro
