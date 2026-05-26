@@ -14,57 +14,87 @@ enum Role {
 }
 
 model User {
-  id          String        @id @default(uuid())
+  id          String         @id @default(uuid())
+
   name        String
-  email       String        @unique
+
+  email       String         @unique
+
   password    String
 
   memberships Membership[]
 
   auditLogs   AuditLog[]
 
-  createdAt   DateTime      @default(now())
+  projects    Project[]
+
+  createdAt   DateTime       @default(now())
 }
 
 model Organization {
-  id          String        @id @default(uuid())
-  name        String
+  id            String         @id @default(uuid())
 
-  memberships Membership[]
+  name          String
 
-  auditLogs   AuditLog[]
+  memberships   Membership[]
 
-  createdAt   DateTime      @default(now())
+  auditLogs     AuditLog[]
+
+  projects      Project[]
+
+  createdAt     DateTime       @default(now())
 }
 
 model Membership {
-  id             String        @id @default(uuid())
+  id               String         @id @default(uuid())
 
-  userId         String
-  organizationId String
+  userId           String
 
-  role           Role          @default(MEMBER)
+  organizationId   String
 
-  user           User          @relation(fields: [userId], references: [id])
+  role             Role           @default(MEMBER)
 
-  organization   Organization  @relation(fields: [organizationId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
 
-  createdAt      DateTime      @default(now())
+  organization     Organization   @relation(fields: [organizationId], references: [id])
+
+  createdAt        DateTime       @default(now())
 
   @@unique([userId, organizationId])
 }
 
 model AuditLog {
-  id             String   @id @default(uuid())
+  id               String         @id @default(uuid())
 
-  action         String
-  description    String
+  action           String
 
-  actorId        String
-  organizationId String
+  description      String
 
-  actor          User         @relation(fields: [actorId], references: [id])
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  actorId          String
 
-  createdAt      DateTime @default(now())
+  organizationId   String
+
+  actor            User           @relation(fields: [actorId], references: [id])
+
+  organization     Organization   @relation(fields: [organizationId], references: [id])
+
+  createdAt        DateTime       @default(now())
+}
+
+model Project {
+  id               String         @id @default(uuid())
+
+  name             String
+
+  description      String?
+
+  organizationId   String
+
+  createdById      String
+
+  organization     Organization   @relation(fields: [organizationId], references: [id])
+
+  createdBy        User           @relation(fields: [createdById], references: [id])
+
+  createdAt        DateTime       @default(now())
 }

@@ -6,12 +6,18 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { AuditModule } from './audit/audit.module';
+ 
+import { PrismaService } from './prisma/prisma.service';
+import { ProjectsModule } from './projects/projects.module';
+
 
 
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule],
+  imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule, ProjectsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    PrismaService,
+    ],
 })
 export class AppModule {}
