@@ -9,12 +9,16 @@ import { AuditModule } from './audit/audit.module';
  
 import { PrismaService } from './prisma/prisma.service';
 import { ProjectsModule } from './projects/projects.module';
+import { TasksModule } from './tasks/tasks.module';
+import { TaskCommentsModule } from './task-comments/task-comments.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 
 
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule, ProjectsModule],
+  imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule, ProjectsModule, TasksModule, TaskCommentsModule, AnalyticsModule, NotificationsModule],
   controllers: [AppController],
   providers: [AppService,
     PrismaService,

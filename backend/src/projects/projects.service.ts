@@ -167,7 +167,28 @@ async remove( // método para deletar um projeto
     message: 'Project deleted successfully', 
   };
 }
+async findById( // procura projetos pelo id
+  organizationId: string,
 
+  projectId: string,
+) {
+  const project =
+    await this.prisma.project.findFirst({ // procura o projeto dentro da organização
+      where: {
+        id: projectId,
+
+        organizationId,
+      },
+    });
+
+  if (!project) {
+    throw new NotFoundException( // se não achar lança esse erro
+      'Project not found',
+    );
+  }
+
+  return project;
+}
 
 
 

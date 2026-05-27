@@ -88,7 +88,7 @@ async update( // endpoint para atualização do projeto
   );
 }
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.OWNER, Role.ADMIN) // apenas admins e owners podem deletar um projeto 
+@Roles(Role.OWNER, Role.ADMIN) // apenas admins e owners podem deletar um projeto   
 @Delete(':projectId')
 async remove( // endpoint responsável por deletar um projeto
   @Param('organizationId')
@@ -105,6 +105,22 @@ async remove( // endpoint responsável por deletar um projeto
     projectId,
 
     req.user.id,
+  );
+}
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.OWNER, Role.ADMIN, Role.MEMBER) // todos podem buscar um projeto 
+@Get(':projectId')
+async findById( // endpoint para buscar um projeto 
+  @Param('organizationId')
+  organizationId: string,
+
+  @Param('projectId')
+  projectId: string,
+) {
+  return this.projectsService.findById(
+    organizationId,
+
+    projectId,
   );
 }
 

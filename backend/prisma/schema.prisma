@@ -13,36 +13,56 @@ enum Role {
   MEMBER
 }
 
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 model User {
-  id          String         @id @default(uuid())
+  id               String         @id @default(uuid())
 
-  name        String
+  name             String
 
-  email       String         @unique
+  email            String         @unique
 
-  password    String
+  password         String
 
-  memberships Membership[]
+  memberships      Membership[]
 
-  auditLogs   AuditLog[]
+  auditLogs        AuditLog[]
 
-  projects    Project[]
+  projects         Project[]
 
-  createdAt   DateTime       @default(now())
+  assignedTasks    Task[]         @relation("AssignedTasks")
+
+  createdTasks     Task[]         @relation("CreatedTasks")
+
+  taskComments     TaskComment[]
+
+  notifications    Notification[]
+
+  createdAt        DateTime       @default(now())
 }
 
 model Organization {
-  id            String         @id @default(uuid())
+  id               String         @id @default(uuid())
 
-  name          String
+  name             String
 
-  memberships   Membership[]
+  memberships      Membership[]
 
-  auditLogs     AuditLog[]
+  auditLogs        AuditLog[]
 
-  projects      Project[]
+  projects         Project[]
 
-  createdAt     DateTime       @default(now())
+  createdAt        DateTime       @default(now())
 }
 
 model Membership {
@@ -95,6 +115,70 @@ model Project {
   organization     Organization   @relation(fields: [organizationId], references: [id])
 
   createdBy        User           @relation(fields: [createdById], references: [id])
+
+  tasks            Task[]
+
+  createdAt        DateTime       @default(now())
+}
+
+model Task {
+  id               String         @id @default(uuid())
+
+  title            String
+
+  description      String?
+
+  status           TaskStatus     @default(TODO)
+
+  priority         TaskPriority   @default(MEDIUM)
+
+  dueDate          DateTime?
+
+  projectId        String
+
+  assignedToId     String?
+
+  createdById      String
+
+  project          Project        @relation(fields: [projectId], references: [id])
+
+  assignedTo       User?          @relation("AssignedTasks", fields: [assignedToId], references: [id])
+
+  createdBy        User           @relation("CreatedTasks", fields: [createdById], references: [id])
+
+  comments         TaskComment[]
+
+  createdAt        DateTime       @default(now())
+}
+
+model TaskComment {
+  id               String         @id @default(uuid())
+
+  content          String
+
+  taskId           String
+
+  authorId         String
+
+  task             Task           @relation(fields: [taskId], references: [id])
+
+  author           User           @relation(fields: [authorId], references: [id])
+
+  createdAt        DateTime       @default(now())
+}
+
+model Notification {
+  id               String         @id @default(uuid())
+
+  title            String
+
+  message          String
+
+  read             Boolean        @default(false)
+
+  userId           String
+
+  user             User           @relation(fields: [userId], references: [id])
 
   createdAt        DateTime       @default(now())
 }
