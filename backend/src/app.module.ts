@@ -15,11 +15,12 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ChatModule } from './chat/chat.module';
 import { FilesModule } from './files/files.module';
+import { TeamsModule } from './teams/teams.module';
 
 
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule, ProjectsModule, TasksModule, TaskCommentsModule, AnalyticsModule, NotificationsModule, ChatModule,FilesModule],
+  imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule, ProjectsModule, TasksModule, TaskCommentsModule, AnalyticsModule, NotificationsModule, ChatModule,FilesModule,TeamsModule],
   controllers: [AppController],
   providers: [AppService,
     PrismaService,

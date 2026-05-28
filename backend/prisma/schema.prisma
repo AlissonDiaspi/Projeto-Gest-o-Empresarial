@@ -52,6 +52,8 @@ model User {
 
   files            File[]
 
+  teamMembers      TeamMember[]
+
   createdAt        DateTime         @default(now())
 }
 
@@ -65,6 +67,8 @@ model Organization {
   auditLogs        AuditLog[]
 
   projects         Project[]
+
+  teams            Team[]
 
   createdAt        DateTime         @default(now())
 }
@@ -224,10 +228,41 @@ model File {
 
   projectId        String?
 
-  
   uploadedBy       User             @relation(fields: [uploadedById], references: [id])
 
   project          Project?         @relation(fields: [projectId], references: [id])
 
   createdAt        DateTime         @default(now())
+}
+
+model Team {
+  id               String           @id @default(uuid())
+
+  name             String
+
+  description      String?
+
+  organizationId   String
+
+  organization     Organization     @relation(fields: [organizationId], references: [id])
+
+  members          TeamMember[]
+
+  createdAt        DateTime         @default(now())
+}
+
+model TeamMember {
+  id               String           @id @default(uuid())
+
+  teamId           String
+
+  userId           String
+
+  team             Team             @relation(fields: [teamId], references: [id])
+
+  user             User             @relation(fields: [userId], references: [id])
+
+  createdAt        DateTime         @default(now())
+
+  @@unique([teamId, userId])
 }
