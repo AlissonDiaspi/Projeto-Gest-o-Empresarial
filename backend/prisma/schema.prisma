@@ -26,11 +26,11 @@ enum TaskPriority {
 }
 
 model User {
-  id               String         @id @default(uuid())
+  id               String           @id @default(uuid())
 
   name             String
 
-  email            String         @unique
+  email            String           @unique
 
   password         String
 
@@ -40,19 +40,23 @@ model User {
 
   projects         Project[]
 
-  assignedTasks    Task[]         @relation("AssignedTasks")
+  assignedTasks    Task[]           @relation("AssignedTasks")
 
-  createdTasks     Task[]         @relation("CreatedTasks")
+  createdTasks     Task[]           @relation("CreatedTasks")
 
   taskComments     TaskComment[]
 
   notifications    Notification[]
 
-  createdAt        DateTime       @default(now())
+  chatMessages     ChatMessage[]
+
+  files            File[]
+
+  createdAt        DateTime         @default(now())
 }
 
 model Organization {
-  id               String         @id @default(uuid())
+  id               String           @id @default(uuid())
 
   name             String
 
@@ -62,29 +66,29 @@ model Organization {
 
   projects         Project[]
 
-  createdAt        DateTime       @default(now())
+  createdAt        DateTime         @default(now())
 }
 
 model Membership {
-  id               String         @id @default(uuid())
+  id               String           @id @default(uuid())
 
   userId           String
 
   organizationId   String
 
-  role             Role           @default(MEMBER)
+  role             Role             @default(MEMBER)
 
-  user             User           @relation(fields: [userId], references: [id])
+  user             User             @relation(fields: [userId], references: [id])
 
-  organization     Organization   @relation(fields: [organizationId], references: [id])
+  organization     Organization     @relation(fields: [organizationId], references: [id])
 
-  createdAt        DateTime       @default(now())
+  createdAt        DateTime         @default(now())
 
   @@unique([userId, organizationId])
 }
 
 model AuditLog {
-  id               String         @id @default(uuid())
+  id               String           @id @default(uuid())
 
   action           String
 
@@ -94,15 +98,15 @@ model AuditLog {
 
   organizationId   String
 
-  actor            User           @relation(fields: [actorId], references: [id])
+  actor            User             @relation(fields: [actorId], references: [id])
 
-  organization     Organization   @relation(fields: [organizationId], references: [id])
+  organization     Organization     @relation(fields: [organizationId], references: [id])
 
-  createdAt        DateTime       @default(now())
+  createdAt        DateTime         @default(now())
 }
 
 model Project {
-  id               String         @id @default(uuid())
+  id               String           @id @default(uuid())
 
   name             String
 
@@ -112,25 +116,29 @@ model Project {
 
   createdById      String
 
-  organization     Organization   @relation(fields: [organizationId], references: [id])
+  organization     Organization     @relation(fields: [organizationId], references: [id])
 
-  createdBy        User           @relation(fields: [createdById], references: [id])
+  createdBy        User             @relation(fields: [createdById], references: [id])
 
   tasks            Task[]
 
-  createdAt        DateTime       @default(now())
+  chatMessages     ChatMessage[]
+
+  files            File[]
+
+  createdAt        DateTime         @default(now())
 }
 
 model Task {
-  id               String         @id @default(uuid())
+  id               String           @id @default(uuid())
 
   title            String
 
   description      String?
 
-  status           TaskStatus     @default(TODO)
+  status           TaskStatus       @default(TODO)
 
-  priority         TaskPriority   @default(MEDIUM)
+  priority         TaskPriority     @default(MEDIUM)
 
   dueDate          DateTime?
 
@@ -140,19 +148,19 @@ model Task {
 
   createdById      String
 
-  project          Project        @relation(fields: [projectId], references: [id])
+  project          Project          @relation(fields: [projectId], references: [id])
 
-  assignedTo       User?          @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  assignedTo       User?            @relation("AssignedTasks", fields: [assignedToId], references: [id])
 
-  createdBy        User           @relation("CreatedTasks", fields: [createdById], references: [id])
+  createdBy        User             @relation("CreatedTasks", fields: [createdById], references: [id])
 
   comments         TaskComment[]
 
-  createdAt        DateTime       @default(now())
+  createdAt        DateTime         @default(now())
 }
 
 model TaskComment {
-  id               String         @id @default(uuid())
+  id               String           @id @default(uuid())
 
   content          String
 
@@ -160,25 +168,66 @@ model TaskComment {
 
   authorId         String
 
-  task             Task           @relation(fields: [taskId], references: [id])
+  task             Task             @relation(fields: [taskId], references: [id])
 
-  author           User           @relation(fields: [authorId], references: [id])
+  author           User             @relation(fields: [authorId], references: [id])
 
-  createdAt        DateTime       @default(now())
+  createdAt        DateTime         @default(now())
 }
 
 model Notification {
-  id               String         @id @default(uuid())
+  id               String           @id @default(uuid())
 
   title            String
 
   message          String
 
-  read             Boolean        @default(false)
+  read             Boolean          @default(false)
 
   userId           String
 
-  user             User           @relation(fields: [userId], references: [id])
+  user             User             @relation(fields: [userId], references: [id])
 
-  createdAt        DateTime       @default(now())
+  createdAt        DateTime         @default(now())
+}
+
+model ChatMessage {
+  id               String           @id @default(uuid())
+
+  content          String
+
+  projectId        String
+
+  senderId         String
+
+  project          Project          @relation(fields: [projectId], references: [id])
+
+  sender           User             @relation(fields: [senderId], references: [id])
+
+  createdAt        DateTime         @default(now())
+}
+
+model File {
+  id               String           @id @default(uuid())
+
+  originalName     String
+
+  fileName         String
+
+  path             String
+
+  mimetype         String
+
+  size             Int
+
+  uploadedById     String
+
+  projectId        String?
+
+  
+  uploadedBy       User             @relation(fields: [uploadedById], references: [id])
+
+  project          Project?         @relation(fields: [projectId], references: [id])
+
+  createdAt        DateTime         @default(now())
 }

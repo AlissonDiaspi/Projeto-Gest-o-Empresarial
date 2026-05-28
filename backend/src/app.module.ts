@@ -13,12 +13,13 @@ import { TasksModule } from './tasks/tasks.module';
 import { TaskCommentsModule } from './task-comments/task-comments.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { NotificationsModule } from './notifications/notifications.module';
-
+import { ChatModule } from './chat/chat.module';
+import { FilesModule } from './files/files.module';
 
 
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule, ProjectsModule, TasksModule, TaskCommentsModule, AnalyticsModule, NotificationsModule],
+  imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule, ProjectsModule, TasksModule, TaskCommentsModule, AnalyticsModule, NotificationsModule, ChatModule,FilesModule],
   controllers: [AppController],
   providers: [AppService,
     PrismaService,
