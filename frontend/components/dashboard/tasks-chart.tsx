@@ -2,73 +2,33 @@
 
 import {
   BarChart,
-
   Bar,
-
   XAxis,
-
   YAxis,
-
   Tooltip,
-
   ResponsiveContainer,
 } from 'recharts';
 
 import {
   Card,
-
   CardContent,
-
   CardHeader,
-
   CardTitle,
 } from '@/components/ui/card';
 
-const data = [
-  {
-    name: 'Mon',
+interface TasksChartProps {
+  data?: number[]; // Recebe o array de produtividade (ex: [4, 7, 5, 9, 6, 3, 8])
+}
 
-    tasks: 4,
-  },
+export function TasksChart({ data }: TasksChartProps) {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  {
-    name: 'Tue',
+  // Monta o formato de array de objetos que o Recharts precisa dinamicamente
+  const chartData = days.map((day, index) => ({
+    name: day,
+    tasks: data?.[index] ?? 0, // Pega o valor do índice correspondente ou 0
+  }));
 
-    tasks: 7,
-  },
-
-  {
-    name: 'Wed',
-
-    tasks: 5,
-  },
-
-  {
-    name: 'Thu',
-
-    tasks: 9,
-  },
-
-  {
-    name: 'Fri',
-
-    tasks: 6,
-  },
-
-  {
-    name: 'Sat',
-
-    tasks: 3,
-  },
-
-  {
-    name: 'Sun',
-
-    tasks: 8,
-  },
-];
-
-export function TasksChart() {
   return (
     <Card>
       <CardHeader>
@@ -83,15 +43,14 @@ export function TasksChart() {
             width="100%"
             height="100%"
           >
-            <BarChart data={data}>
+            <BarChart data={chartData}>
               <XAxis dataKey="name" />
-
               <YAxis />
-
               <Tooltip />
-
               <Bar
                 dataKey="tasks"
+                fill="currentColor"
+                className="fill-primary"
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>

@@ -2,55 +2,50 @@
 
 import {
   PieChart,
-
   Pie,
-
   Cell,
-
   Tooltip,
-
   ResponsiveContainer,
 } from 'recharts';
 
 import {
   Card,
-
   CardContent,
-
   CardHeader,
-
   CardTitle,
 } from '@/components/ui/card';
 
-const data = [
-  {
-    name: 'TODO',
-
-    value: 14,
-  },
-
-  {
-    name: 'IN_PROGRESS',
-
-    value: 8,
-  },
-
-  {
-    name: 'DONE',
-
-    value: 22,
-  },
-];
+interface TasksPieChartProps {
+  data?: {
+    pending: number;
+    inProgress: number;
+    completed: number;
+  };
+}
 
 const COLORS = [
-  '#3b82f6',
-
-  '#f59e0b',
-
-  '#22c55e',
+  '#3b82f6', // Azul para TODO / Pendente
+  '#f59e0b', // Amarelo para IN_PROGRESS
+  '#22c55e', // Verde para DONE / Concluído
 ];
 
-export function TasksPieChart() {
+export function TasksPieChart({ data }: TasksPieChartProps) {
+  // Mapeia os dados dinâmicos do backend diretamente no formato do gráfico
+  const chartData = [
+    {
+      name: 'TODO',
+      value: data?.pending ?? 0,
+    },
+    {
+      name: 'IN_PROGRESS',
+      value: data?.inProgress ?? 0,
+    },
+    {
+      name: 'DONE',
+      value: data?.completed ?? 0,
+    },
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -67,13 +62,13 @@ export function TasksPieChart() {
           >
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 dataKey="value"
                 nameKey="name"
                 outerRadius={120}
                 label
               >
-                {data.map(
+                {chartData.map(
                   (entry, index) => (
                     <Cell
                       key={entry.name}

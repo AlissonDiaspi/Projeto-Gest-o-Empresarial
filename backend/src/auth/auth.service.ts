@@ -35,8 +35,17 @@ export class AuthService {
 
         };
         return{
-            acess_token:
+            access_token:
             await this.jwtService.signAsync(payload)
         };
     }
+    async getProfile(userId: string) {
+    const user = await this.usersService.findById(userId); // Certifique-se que seu UsersService tenha esse método
+    if (!user) {
+        throw new UnauthorizedException('Usuário não encontrado');
+    }
+    // Removemos a senha do retorno por segurança
+    const { password, ...result } = user;
+    return result;
+}
 }

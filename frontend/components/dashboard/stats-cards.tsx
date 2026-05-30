@@ -1,58 +1,52 @@
 import {
   FolderKanban,
-
   CheckSquare,
-
   Users,
-
   ClipboardCheck,
 } from 'lucide-react';
 
 import {
   Card,
-
   CardContent,
-
   CardHeader,
-
   CardTitle,
 } from '@/components/ui/card';
 
-const stats = [
-  {
-    title: 'Projects',
+// Define o que o componente espera receber do app/page.tsx
+interface StatsCardsProps {
+  data: {
+    projectsCount: number;
+    tasksCount: number;
+    completedTasksCount: number;
+    teamsCount: number;
+  } | null;
+}
 
-    value: '12',
+export function StatsCards({ data }: StatsCardsProps) {
+  // Se houver dados reais do backend, usamos eles. Caso contrário, assume 0 temporariamente
+  const stats = [
+    {
+      title: 'Projects',
+      value: data?.projectsCount ?? 0,
+      icon: FolderKanban,
+    },
+    {
+      title: 'Tasks',
+      value: data?.tasksCount ?? 0,
+      icon: CheckSquare,
+    },
+    {
+      title: 'Completed',
+      value: data?.completedTasksCount ?? 0,
+      icon: ClipboardCheck,
+    },
+    {
+      title: 'Teams',
+      value: data?.teamsCount ?? 0,
+      icon: Users,
+    },
+  ];
 
-    icon: FolderKanban,
-  },
-
-  {
-    title: 'Tasks',
-
-    value: '84',
-
-    icon: CheckSquare,
-  },
-
-  {
-    title: 'Completed',
-
-    value: '56',
-
-    icon: ClipboardCheck,
-  },
-
-  {
-    title: 'Teams',
-
-    value: '6',
-
-    icon: Users,
-  },
-];
-
-export function StatsCards() {
   return (
     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
       {stats.map((stat) => {

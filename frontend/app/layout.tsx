@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-
 import {
   Geist,
   Geist_Mono,
@@ -9,32 +8,32 @@ import {
 import './globals.css';
 
 import { cn } from '@/lib/utils';
-
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { AuthProvider } from '@/hooks/use-auth';
+
+import {
+  OrganizationProvider,
+} from '@/contexts/organization-context';
 
 const inter = Inter({
   subsets: ['latin'],
-
   variable: '--font-sans',
 });
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
-
   subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
-
   subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: 'Enterprise Management System',
-
+  title: 'Enterprise Management',
   description:
-    'Enterprise SaaS Platform',
+    'Enterprise Management System',
 };
 
 export default function RootLayout({
@@ -43,20 +42,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="pt-BR"
+      suppressHydrationWarning
+    >
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
-
           inter.variable,
-
           geistSans.variable,
-
-          geistMono.variable,
+          geistMono.variable
         )}
       >
-        <ThemeProvider>
-          {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+        >
+         <AuthProvider>
+  <OrganizationProvider>
+    {children}
+  </OrganizationProvider>
+</AuthProvider>
         </ThemeProvider>
       </body>
     </html>

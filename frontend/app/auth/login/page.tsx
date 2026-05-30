@@ -1,94 +1,110 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
+import { useAuth } from '@/hooks/use-auth';
+
+import { Sidebar } from '@/components/layout/sidebar';
+import { Navbar } from '@/components/layout/navbar';
+
+import { StatsCards } from '@/components/dashboard/stats-cards';
+import { TasksPieChart } from '@/components/dashboard/tasks-pie-chart';
+import { TasksChart } from '@/components/dashboard/tasks-chart';
+
 import {
-  useState,
-} from 'react';
+  DashboardStats,
+  getDashboardStats,
+} from '@/services/dashboard.service';
 
-import { Button } from '@/components/ui/button';
+import { ProtectedRoute } from '@/components/auth/protected-route';
 
-import { Input } from '@/components/ui/input';
+export default function Home() {
+  const { user, isLoading: isAuthLoading } =
+    useAuth();
 
-import { Label } from '@/components/ui/label';
+  const [stats, setStats] =
+    useState<DashboardStats | null>(null);
 
-import { login } from '@/services/auth.service';
+  const [isStatsLoading, setIsStatsLoading] =
+    useState(true);
 
-import { useRouter } from 'next/navigation';
+  useEffect(() => {
+    async function loadDashboard() {
+      try {
+        setIsStatsLoading(true);
 
-export default function LoginPage() {
-  const [email, setEmail] =
-    useState('');
+        const data =
+          await getDashboardStats();
 
-  const [password, setPassword] =
-    useState('');
+        setStats(data);
+      } catch (error) {
+        console.error(
+          'Erro ao carregar dashboard:',
+          error,
+        );
+      } finally {
+        setIsStatsLoading(false);
+      }
+    }
 
-  async function handleLogin(
-    e: React.FormEvent,
-  ) {
-    e.preventDefault();
-
-    console.log({
-      email,
-
-      password,
-    });
-  }
+    if (!isAuthLoading && user) {
+      loadDashboard();
+    }
+  }, [isAuthLoading, user]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-2xl border bg-card p-8 shadow-lg">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">
-            Welcome Back 👋
-          </h1>
-
-          <p className="text-muted-foreground">
-            Login to your account
+    <ProtectedRoute>
+      {isAuthLoading || isStatsLoading ? (
+        <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
+          <p className="text-sm font-medium animate-pulse text-muted-foreground">
+            Carregando dashboard...
           </p>
         </div>
+      ) : (
+        <main className="flex min-h-screen bg-background text-foreground">
+          <Sidebar />
 
-        <form
-          onSubmit={handleLogin}
-          className="space-y-6"
-        >
-          <div className="space-y-2">
-            <Label>
-              Email
-            </Label>
+          <section className="flex flex-1 flex-col">
+            <Navbar />
 
-            <Input
-              type="email"
-              placeholder="john@email.com"
-              value={email}
-              onChange={(e) =>
-                setEmail(
-                  e.target.value,
-                )
-              }
-            />
-          </div>
+            <div className="space-y-8 p-8">
+              <div>
+                <h1 className="text-5xl font-bold tracking-tight">
+                  Enterprise Dashboard 🚀
+                </h1>
 
-          <div className="space-y-2">
-            <Label>
-              Password
-            </Label>
+                <p className="mt-2 text-muted-foreground">
+                  Bem-vindo de volta,
+                  {' '}
+                  {user?.name}
+                </p>
+              </div>
 
-            <Input
-              type="password"
-              placeholder="********"
-              value={password}
-              onChange={(e) =>
-                setPassword(
-                  e.target.value,
-                )
-              }
-            />
-          </div>
+              {stats && (
+                <>
+                  <StatsCards
+                    data={stats}
+                  />
 
-          <Button className="w-full">
-            Login
-          </Button>
-        </form>
-      </div>
-    </main>
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <TasksPieChart
+                      data={
+                        stats.taskStatusDistribution
+                      }
+                    />
+
+                    <TasksChart
+                      data={
+                        stats.weeklyProductivity
+                      }
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+        </main>
+      )}
+    </ProtectedRoute>
   );
 }
