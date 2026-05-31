@@ -19,6 +19,7 @@ import { TeamsModule } from './teams/teams.module';
 
 
 
+
 @Module({
   imports: [AuthModule, UsersModule, PrismaModule, OrganizationsModule, OrganizationsModule, AuditModule, ProjectsModule, TasksModule, TaskCommentsModule, AnalyticsModule, NotificationsModule, ChatModule,FilesModule,TeamsModule],
   controllers: [AppController],

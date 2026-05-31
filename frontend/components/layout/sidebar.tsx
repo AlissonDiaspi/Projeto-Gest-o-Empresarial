@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // Opcional: para deixar o link ativo com destaque
+import { usePathname } from 'next/navigation';
 
 import {
   LayoutDashboard,
   FolderKanban,
-  CheckSquare,
   Users,
   MessageSquare,
   Bell,
@@ -15,7 +14,7 @@ import {
 const links = [
   {
     name: 'Dashboard',
-    href: '/', // ✨ CORRIGIDO: Agora aponta exatamente para a sua rota raiz app/page.tsx
+    href: '/',
     icon: LayoutDashboard,
   },
   {
@@ -23,11 +22,7 @@ const links = [
     href: '/projects',
     icon: FolderKanban,
   },
-  {
-    name: 'Tasks',
-    href: '/tasks',
-    icon: CheckSquare,
-  },
+  // Tasks REMOVIDA - Tasks pertencem a cada projeto individualmente
   {
     name: 'Teams',
     href: '/teams',
@@ -46,7 +41,7 @@ const links = [
 ];
 
 export function Sidebar() {
-  const pathname = usePathname(); // Pega a rota atual para estilizar o botão ativo
+  const pathname = usePathname();
 
   return (
     <aside className="w-64 border-r bg-background p-6">

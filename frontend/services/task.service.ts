@@ -1,71 +1,65 @@
+// services/task.service.ts
 import { api } from '@/lib/axios';
 
 export interface Task {
   id: string;
   title: string;
   description?: string;
-  status:
-    | 'TODO'
-    | 'IN_PROGRESS'
-    | 'DONE';
-
+  status: string;
+  priority: string;
   projectId: string;
-
-  createdAt: string;
+  dueDate?: string;
+  assignedTo?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
-export interface CreateTaskDTO {
-  title: string;
-  description?: string;
-  status: 'TODO' | 'IN_PROGRESS' | 'DONE';
-  projectId: string;
-}
-
-export async function getTasks(): Promise<Task[]> {
-  const response = await api.get(
-    '/tasks',
-  );
-
-  return response.data.data ?? [];
-}
-
-export async function getTaskById(
-  id: string,
-): Promise<Task> {
-  const response = await api.get(
-    `/tasks/${id}`,
-  );
-
+export async function getTasks(projectId: string): Promise<Task[]> {
+  const response = await api.get(`/projects/${projectId}/tasks`);
   return response.data.data;
 }
 
 export async function createTask(
-  data: CreateTaskDTO,
+  projectId: string,
+  data: {
+    title: string;
+    description?: string;
+    priority: string;
+    assignedToId?: string;
+    dueDate?: string;
+  },
 ): Promise<Task> {
-  const response = await api.post(
-    '/tasks',
-    data,
-  );
-
+  const response = await api.post(`/projects/${projectId}/tasks`, data);
   return response.data.data;
 }
 
 export async function updateTask(
-  id: string,
-  data: Partial<CreateTaskDTO>,
+  projectId: string,
+  taskId: string,
+  data: {
+    title?: string;
+    description?: string;
+    priority?: string;
+    status?: string;
+    assignedToId?: string;
+    dueDate?: string;
+  },
 ): Promise<Task> {
-  const response = await api.patch(
-    `/tasks/${id}`,
-    data,
-  );
-
+  const response = await api.patch(`/projects/${projectId}/tasks/${taskId}`, data);
   return response.data.data;
 }
 
-export async function deleteTask(
-  id: string,
-): Promise<void> {
-  await api.delete(
-    `/tasks/${id}`,
-  );
+export async function updateTaskStatus(
+  projectId: string,
+  taskId: string,
+  status: string,
+): Promise<Task> {
+  const response = await api.patch(`/projects/${projectId}/tasks/${taskId}/status`, { status });
+  return response.data.data;
+}
+
+export async function deleteTask(projectId: string, taskId: string): Promise<void> {
+  await api.delete(`/projects/${projectId}/tasks/${taskId}`);
 }

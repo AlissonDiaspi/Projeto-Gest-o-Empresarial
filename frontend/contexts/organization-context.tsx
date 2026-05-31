@@ -1,136 +1,98 @@
+// contexts/organization-context.tsx
 'use client';
 
-import {
-  createContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { getOrganizations, Organization } from '@/services/organization.service';
+import { usePathname } from 'next/navigation';
 
-import {
-  Organization,
-  getOrganizations,
-} from '@/services/organization.service';
-
-interface OrganizationContextData {
+interface OrganizationContextType {
   organizations: Organization[];
-
-  activeOrganization:
-    Organization | null;
-
-  setActiveOrganization:
-    (organization: Organization) => void;
-
-  isLoading: boolean;
+  activeOrganization: Organization | null;
+  loading: boolean;
+  setActiveOrganization: (org: Organization) => void;
+  refreshOrganizations: () => Promise<void>;
 }
 
-export const OrganizationContext =
-  createContext(
-    {} as OrganizationContextData,
-  );
+export const OrganizationContext = createContext<OrganizationContextType>({} as OrganizationContextType);
 
-interface Props {
-  children: ReactNode;
-}
+export function OrganizationProvider({ children }: { children: React.ReactNode }) {
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [activeOrganization, setActiveOrganization] = useState<Organization | null>(null);
+  const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
 
-export function OrganizationProvider({
-  children,
-}: Props) {
-  const [
-    organizations,
-    setOrganizations,
-  ] = useState<Organization[]>([]);
-
-  const [
-    activeOrganization,
-    setActiveOrganizationState,
-  ] =
-    useState<Organization | null>(
-      null,
-    );
-
-  const [isLoading, setIsLoading] =
-    useState(true);
-
-  useEffect(() => {
-    loadOrganizations();
-  }, []);
+  // Verificar se está na página de login
+  const isLoginPage = pathname === '/auth/login' || pathname === '/login' || pathname === '/login-simple';
 
   async function loadOrganizations() {
+    // Se estiver na página de login, não carregar nada
+    if (isLoginPage) {
+      setLoading(false);
+      return;
+    }
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const data =
-        await getOrganizations();
-
+      const data = await getOrganizations();
       setOrganizations(data);
-
-      const savedOrganizationId =
-        localStorage.getItem(
-          'active_organization_id',
-        );
-
-      if (
-        savedOrganizationId &&
-        data.length > 0
-      ) {
-        const organization =
-          data.find(
-            (org) =>
-              org.id ===
-              savedOrganizationId,
-          );
-
-        if (organization) {
-          setActiveOrganizationState(
-            organization,
-          );
-
-          return;
+      
+      const savedOrgId = localStorage.getItem('active_organization_id');
+      if (savedOrgId && data.length > 0) {
+        const active = data.find(org => org.id === savedOrgId);
+        if (active) {
+          setActiveOrganization(active);
+        } else if (data.length > 0) {
+          setActiveOrganization(data[0]);
+          localStorage.setItem('active_organization_id', data[0].id);
         }
-      }
-
-      if (data.length > 0) {
-        setActiveOrganizationState(
-          data[0],
-        );
-
-        localStorage.setItem(
-          'active_organization_id',
-          data[0].id,
-        );
+      } else if (data.length > 0) {
+        setActiveOrganization(data[0]);
+        localStorage.setItem('active_organization_id', data[0].id);
       }
     } catch (error) {
-      console.error(
-        'Erro ao carregar organizações',
-        error,
-      );
+      console.error('Erro ao carregar organizações:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }
 
-  function setActiveOrganization(
-    organization: Organization,
-  ) {
-    setActiveOrganizationState(
-      organization,
-    );
+  useEffect(() => {
+    loadOrganizations();
+  }, [pathname]);
 
-    localStorage.setItem(
-      'active_organization_id',
-      organization.id,
-    );
-  }
+  const refreshOrganizations = async () => {
+    await loadOrganizations();
+  };
+
+  const handleSetActiveOrganization = (org: Organization) => {
+    setActiveOrganization(org);
+    localStorage.setItem('active_organization_id', org.id);
+  };
 
   return (
     <OrganizationContext.Provider
       value={{
         organizations,
         activeOrganization,
-        setActiveOrganization,
-        isLoading,
+        loading,
+        setActiveOrganization: handleSetActiveOrganization,
+        refreshOrganizations,
       }}
     >
       {children}
     </OrganizationContext.Provider>
   );
+}
+
+export function useOrganization() {
+  const context = useContext(OrganizationContext);
+  if (!context) {
+    throw new Error('useOrganization must be used within an OrganizationProvider');
+  }
+  return context;
 }

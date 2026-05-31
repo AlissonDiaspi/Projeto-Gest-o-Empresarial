@@ -62,9 +62,19 @@ export function AuthProvider({
         const response =
           await api.get('/auth/me');
 
-        setUser(
-          response.data.data,
-        );
+        console.log('Auth/me response:', response.data);
+        
+        // Tenta diferentes estruturas
+        let userData = null;
+        if (response.data?.data) {
+          userData = response.data.data;
+        } else if (response.data?.user) {
+          userData = response.data.user;
+        } else {
+          userData = response.data;
+        }
+        
+        setUser(userData);
       } catch (error) {
         console.error(
           'Erro ao recuperar sessão:',
@@ -100,32 +110,55 @@ export function AuthProvider({
           },
         );
 
-      console.log(
-        'LOGIN RESPONSE:',
-        response.data,
-      );
-
-      const token =
-        response.data.data.access_token;
+      console.log('LOGIN RESPONSE COMPLETA:', response.data);
+      
+      // Tenta diferentes estruturas para o token
+      let token = null;
+      
+      if (response.data?.data?.access_token) {
+        token = response.data.data.access_token;
+        console.log('Token em response.data.data.access_token');
+      } else if (response.data?.access_token) {
+        token = response.data.access_token;
+        console.log('Token em response.data.access_token');
+      } else if (response.data?.token) {
+        token = response.data.token;
+        console.log('Token em response.data.token');
+      }
 
       if (!token) {
+        console.error('Estrutura da resposta:', JSON.stringify(response.data, null, 2));
         throw new Error(
           'Token não retornado pelo backend',
         );
       }
+
+      console.log('Token obtido com sucesso:', token.substring(0, 50) + '...');
 
       localStorage.setItem(
         'access_token',
         token,
       );
 
+      // Buscar dados do usuário
       const meResponse =
         await api.get('/auth/me');
 
-      setUser(
-        meResponse.data.data,
-      );
+      console.log('ME Response:', meResponse.data);
+      
+      // Tenta diferentes estruturas para o usuário
+      let userData = null;
+      if (meResponse.data?.data) {
+        userData = meResponse.data.data;
+      } else if (meResponse.data?.user) {
+        userData = meResponse.data.user;
+      } else {
+        userData = meResponse.data;
+      }
+      
+      setUser(userData);
 
+      // Redirecionar
       window.location.href = '/';
     } catch (error) {
       console.error(

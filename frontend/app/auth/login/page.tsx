@@ -1,110 +1,95 @@
+// app/auth/login/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/lib/axios';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
-import { useAuth } from '@/hooks/use-auth';
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-import { Sidebar } from '@/components/layout/sidebar';
-import { Navbar } from '@/components/layout/navbar';
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
 
-import { StatsCards } from '@/components/dashboard/stats-cards';
-import { TasksPieChart } from '@/components/dashboard/tasks-pie-chart';
-import { TasksChart } from '@/components/dashboard/tasks-chart';
-
-import {
-  DashboardStats,
-  getDashboardStats,
-} from '@/services/dashboard.service';
-
-import { ProtectedRoute } from '@/components/auth/protected-route';
-
-export default function Home() {
-  const { user, isLoading: isAuthLoading } =
-    useAuth();
-
-  const [stats, setStats] =
-    useState<DashboardStats | null>(null);
-
-  const [isStatsLoading, setIsStatsLoading] =
-    useState(true);
-
-  useEffect(() => {
-    async function loadDashboard() {
-      try {
-        setIsStatsLoading(true);
-
-        const data =
-          await getDashboardStats();
-
-        setStats(data);
-      } catch (error) {
-        console.error(
-          'Erro ao carregar dashboard:',
-          error,
-        );
-      } finally {
-        setIsStatsLoading(false);
+    try {
+      setLoading(true);
+      
+      const response = await api.post('/auth/login', { email, password });
+      
+      console.log('Resposta:', response.data);
+      
+      const token = response.data?.data?.access_token;
+      
+      if (!token) {
+        toast.error('Erro ao obter token');
+        return;
       }
+      
+      localStorage.setItem('access_token', token);
+      
+      // Buscar organizações
+      const orgsResponse = await api.get('/organizations');
+      const organizations = orgsResponse.data?.data || orgsResponse.data;
+      
+      if (organizations && organizations.length > 0) {
+        localStorage.setItem('active_organization_id', organizations[0].id);
+      }
+      
+      toast.success('Login realizado!');
+      router.push('/');
+      
+    } catch (error: any) {
+      console.error('Erro:', error);
+      toast.error(error.response?.data?.message || 'Erro ao fazer login');
+    } finally {
+      setLoading(false);
     }
-
-    if (!isAuthLoading && user) {
-      loadDashboard();
-    }
-  }, [isAuthLoading, user]);
+  };
 
   return (
-    <ProtectedRoute>
-      {isAuthLoading || isStatsLoading ? (
-        <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
-          <p className="text-sm font-medium animate-pulse text-muted-foreground">
-            Carregando dashboard...
-          </p>
-        </div>
-      ) : (
-        <main className="flex min-h-screen bg-background text-foreground">
-          <Sidebar />
-
-          <section className="flex flex-1 flex-col">
-            <Navbar />
-
-            <div className="space-y-8 p-8">
-              <div>
-                <h1 className="text-5xl font-bold tracking-tight">
-                  Enterprise Dashboard 🚀
-                </h1>
-
-                <p className="mt-2 text-muted-foreground">
-                  Bem-vindo de volta,
-                  {' '}
-                  {user?.name}
-                </p>
-              </div>
-
-              {stats && (
-                <>
-                  <StatsCards
-                    data={stats}
-                  />
-
-                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <TasksPieChart
-                      data={
-                        stats.taskStatusDistribution
-                      }
-                    />
-
-                    <TasksChart
-                      data={
-                        stats.weeklyProductivity
-                      }
-                    />
-                  </div>
-                </>
-              )}
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Login</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-          </section>
-        </main>
-      )}
-    </ProtectedRoute>
+            <div>
+              <Input
+                type="password"
+                placeholder="Senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+// services/project.service.ts
 import { api } from '@/lib/axios';
 
 export interface Project {
@@ -5,68 +6,57 @@ export interface Project {
   name: string;
   description?: string;
   organizationId: string;
+  teamId?: string;
+  startDate?: string;
+  endDate?: string;
+  team?: {
+    id: string;
+    name: string;
+  };
+  createdById: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
-export interface CreateProjectDTO {
-  name: string;
-  description?: string;
-  organizationId?: string;
+export async function getProjects(organizationId: string): Promise<Project[]> {
+  const response = await api.get(`/organizations/${organizationId}/projects`);
+  return response.data.data;
 }
 
-export async function getProjects(): Promise<Project[]> {
-  const response = await api.get('/projects');
-
-  return response.data.data ?? [];
-}
-
-export async function getProjectById(
-  id: string,
-): Promise<Project> {
-  const response = await api.get(
-    `/projects/${id}`,
-  );
-
+export async function getProjectById(organizationId: string, projectId: string): Promise<Project> {
+  const response = await api.get(`/organizations/${organizationId}/projects/${projectId}`);
   return response.data.data;
 }
 
 export async function createProject(
-  data: CreateProjectDTO,
+  organizationId: string,
+  data: {
+    name: string;
+    description?: string;
+    teamId?: string;
+    startDate?: string;
+    endDate?: string;
+  },
 ): Promise<Project> {
-  const organizationId =
-    localStorage.getItem(
-      'active_organization_id',
-    );
-
-  const payload = {
-    ...data,
-    organizationId,
-  };
-
-  const response = await api.post(
-    '/projects',
-    payload,
-  );
-
+  const response = await api.post(`/organizations/${organizationId}/projects`, data);
   return response.data.data;
 }
 
 export async function updateProject(
-  id: string,
-  data: Partial<CreateProjectDTO>,
+  organizationId: string,
+  projectId: string,
+  data: {
+    name?: string;
+    description?: string;
+    teamId?: string;
+    startDate?: string;
+    endDate?: string;
+  },
 ): Promise<Project> {
-  const response = await api.patch(
-    `/projects/${id}`,
-    data,
-  );
-
+  const response = await api.patch(`/organizations/${organizationId}/projects/${projectId}`, data);
   return response.data.data;
 }
 
-export async function deleteProject(
-  id: string,
-): Promise<void> {
-  await api.delete(
-    `/projects/${id}`,
-  );
+export async function deleteProject(organizationId: string, projectId: string): Promise<void> {
+  await api.delete(`/organizations/${organizationId}/projects/${projectId}`);
 }

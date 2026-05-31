@@ -12,7 +12,7 @@ export class UsersService {
 
     }
 
-    async create(data: CreateUserDto){
+    async create(data: CreateUserDto){ // criar um novo usuário
         const userExists = await this.prisma.user.findUnique({
             where: {
                 email: data.email,

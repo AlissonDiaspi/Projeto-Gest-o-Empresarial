@@ -1,19 +1,16 @@
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+// teams/dto/create-team.dto.ts
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateTeamDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   name!: string;
 
   @IsOptional()
   @IsString()
   description?: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsUUID()
   organizationId!: string;
 }

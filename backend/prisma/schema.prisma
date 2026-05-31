@@ -27,65 +27,39 @@ enum TaskPriority {
 
 model User {
   id               String           @id @default(uuid())
-
   name             String
-
   email            String           @unique
-
   password         String
-
   memberships      Membership[]
-
   auditLogs        AuditLog[]
-
   projects         Project[]
-
   assignedTasks    Task[]           @relation("AssignedTasks")
-
   createdTasks     Task[]           @relation("CreatedTasks")
-
   taskComments     TaskComment[]
-
   notifications    Notification[]
-
   chatMessages     ChatMessage[]
-
   files            File[]
-
   teamMembers      TeamMember[]
-
   createdAt        DateTime         @default(now())
 }
 
 model Organization {
   id               String           @id @default(uuid())
-
   name             String
-
   memberships      Membership[]
-
   auditLogs        AuditLog[]
-
   projects         Project[]
-
   teams            Team[]
-
   createdAt        DateTime         @default(now())
 }
 
 model Membership {
   id               String           @id @default(uuid())
-
   userId           String
-
   organizationId   String
-
   role             Role             @default(MEMBER)
-
   user             User             @relation(fields: [userId], references: [id])
-
   organization     Organization     @relation(fields: [organizationId], references: [id])
-
   createdAt        DateTime         @default(now())
 
   @@unique([userId, organizationId])
@@ -93,175 +67,112 @@ model Membership {
 
 model AuditLog {
   id               String           @id @default(uuid())
-
   action           String
-
   description      String
-
   actorId          String
-
   organizationId   String
-
   actor            User             @relation(fields: [actorId], references: [id])
-
   organization     Organization     @relation(fields: [organizationId], references: [id])
-
   createdAt        DateTime         @default(now())
 }
 
 model Project {
   id               String           @id @default(uuid())
-
   name             String
-
   description      String?
-
   organizationId   String
-
   createdById      String
-
+  teamId           String?
+  startDate        DateTime?        // ADICIONADO
+  endDate          DateTime?        // ADICIONADO
   organization     Organization     @relation(fields: [organizationId], references: [id])
-
   createdBy        User             @relation(fields: [createdById], references: [id])
-
+  team             Team?            @relation(fields: [teamId], references: [id])
   tasks            Task[]
-
   chatMessages     ChatMessage[]
-
   files            File[]
-
   createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 }
 
 model Task {
   id               String           @id @default(uuid())
-
   title            String
-
   description      String?
-
   status           TaskStatus       @default(TODO)
-
   priority         TaskPriority     @default(MEDIUM)
-
   dueDate          DateTime?
-
   projectId        String
-
   assignedToId     String?
-
   createdById      String
-
   project          Project          @relation(fields: [projectId], references: [id])
-
   assignedTo       User?            @relation("AssignedTasks", fields: [assignedToId], references: [id])
-
   createdBy        User             @relation("CreatedTasks", fields: [createdById], references: [id])
-
   comments         TaskComment[]
-
   createdAt        DateTime         @default(now())
 }
 
 model TaskComment {
   id               String           @id @default(uuid())
-
   content          String
-
   taskId           String
-
   authorId         String
-
   task             Task             @relation(fields: [taskId], references: [id])
-
   author           User             @relation(fields: [authorId], references: [id])
-
   createdAt        DateTime         @default(now())
 }
 
 model Notification {
   id               String           @id @default(uuid())
-
   title            String
-
   message          String
-
   read             Boolean          @default(false)
-
   userId           String
-
   user             User             @relation(fields: [userId], references: [id])
-
   createdAt        DateTime         @default(now())
 }
 
 model ChatMessage {
   id               String           @id @default(uuid())
-
   content          String
-
   projectId        String
-
   senderId         String
-
   project          Project          @relation(fields: [projectId], references: [id])
-
   sender           User             @relation(fields: [senderId], references: [id])
-
   createdAt        DateTime         @default(now())
 }
 
 model File {
   id               String           @id @default(uuid())
-
   originalName     String
-
   fileName         String
-
   path             String
-
   mimetype         String
-
   size             Int
-
   uploadedById     String
-
   projectId        String?
-
   uploadedBy       User             @relation(fields: [uploadedById], references: [id])
-
   project          Project?         @relation(fields: [projectId], references: [id])
-
   createdAt        DateTime         @default(now())
 }
 
 model Team {
   id               String           @id @default(uuid())
-
   name             String
-
   description      String?
-
   organizationId   String
-
   organization     Organization     @relation(fields: [organizationId], references: [id])
-
   members          TeamMember[]
-
+  projects         Project[]
   createdAt        DateTime         @default(now())
 }
 
 model TeamMember {
   id               String           @id @default(uuid())
-
   teamId           String
-
   userId           String
-
   team             Team             @relation(fields: [teamId], references: [id])
-
   user             User             @relation(fields: [userId], references: [id])
-
   createdAt        DateTime         @default(now())
 
   @@unique([teamId, userId])

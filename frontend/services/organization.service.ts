@@ -57,4 +57,7 @@ export async function deleteOrganization(
   await api.delete(
     `/organizations/${id}`,
   );
+
+  
 }
+

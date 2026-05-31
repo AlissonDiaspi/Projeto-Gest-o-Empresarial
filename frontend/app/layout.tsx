@@ -1,3 +1,4 @@
+// app/layout.tsx
 import type { Metadata } from 'next';
 import {
   Geist,
@@ -10,6 +11,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AuthProvider } from '@/hooks/use-auth';
+import { Toaster } from 'sonner';
 
 import {
   OrganizationProvider,
@@ -32,8 +34,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Enterprise Management',
-  description:
-    'Enterprise Management System',
+  description: 'Enterprise Management System',
 };
 
 export default function RootLayout({
@@ -42,10 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="pt-BR"
-      suppressHydrationWarning
-    >
+    <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
@@ -54,16 +52,18 @@ export default function RootLayout({
           geistMono.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-        >
-         <AuthProvider>
-  <OrganizationProvider>
-    {children}
-  </OrganizationProvider>
-</AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <AuthProvider>
+            <OrganizationProvider>
+              {children}
+              <Toaster 
+                position="top-right" 
+                richColors 
+                closeButton
+                duration={4000}
+              />
+            </OrganizationProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

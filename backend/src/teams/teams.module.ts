@@ -1,19 +1,14 @@
+// teams/teams.module.ts (com AuditModule se necessário)
 import { Module } from '@nestjs/common';
-
-import { TeamsController } from './teams.controller';
-
 import { TeamsService } from './teams.service';
-
-import { PrismaService } from '../prisma/prisma.service';
+import { TeamsController } from './teams.controller';
+import { PrismaModule } from '../prisma/prisma.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  controllers: [
-    TeamsController,
-  ],
-
-  providers: [
-    TeamsService,
-    PrismaService,
-  ],
+  imports: [PrismaModule, AuditModule],
+  controllers: [TeamsController],
+  providers: [TeamsService],
+  exports: [TeamsService],
 })
 export class TeamsModule {}

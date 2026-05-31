@@ -1,6 +1,7 @@
 import { Injectable,
          NotFoundException,
          BadRequestException,
+         ForbiddenException, // Adicione este
 
  } from '@nestjs/common';
 
@@ -84,6 +85,57 @@ export class TasksService {
     return task;
         }
 
+        
+        async deleteTask( // método para deletar uma task
+          projectId: string,
+          taskId: string,
+          actorId: string,
+        ) {
+          // Primeiro verifica se a task existe e pertence ao projeto
+          const task = await this.prisma.task.findFirst({
+            where: {
+              id: taskId,
+              projectId: projectId,
+            },
+            include: {
+              project: true,
+            },
+          });
+
+          if (!task) {
+            throw new NotFoundException('Task not found');
+          }
+
+          
+          // (Apenas ADMIN ou o criador da task podem deletar)
+          const membership = await this.prisma.membership.findFirst({
+            where: {
+              userId: actorId,
+              organizationId: task.project.organizationId,
+            },
+          });
+
+          if (!membership || (membership.role !== 'ADMIN' && task.createdById !== actorId)) {
+            throw new ForbiddenException('You do not have permission to delete this task');
+          }
+
+          // Deleta a task
+          const deletedTask = await this.prisma.task.delete({
+            where: {
+              id: taskId,
+            },
+          });
+
+          // Registra no log
+          await this.auditService.log({
+            action: 'DELETE_TASK',
+            description: `Task ${task.title} deletada`,
+            actorId: actorId,
+            organizationId: task.project.organizationId,
+          });
+
+          return deletedTask;
+        }
 
         async updateStatus( // método para atualizar o status de uma task 
   projectId: string,
@@ -201,9 +253,6 @@ async findAllByProject( // método para listar as tasks de um projeto por filtro
     },
   });
 }
-
-
-
 
 async assignTask( // função que atribui uma task para um usuário 
   projectId: string,
@@ -386,6 +435,43 @@ async findOverdueTasks( // método para achar tasks atrasadas
       },
     },
   });
+}
+async updateTask(
+  projectId: string,
+  taskId: string,
+  data: {
+    title?: string;
+    description?: string;
+    priority?: TaskPriority;
+  },
+  actorId: string,
+) {
+  const task = await this.prisma.task.findFirst({
+    where: { id: taskId, projectId },
+    include: { project: true },
+  });
+
+  if (!task) {
+    throw new NotFoundException('Task not found');
+  }
+
+  const updatedTask = await this.prisma.task.update({
+    where: { id: taskId },
+    data: {
+      title: data.title,
+      description: data.description,
+      priority: data.priority,
+    },
+  });
+
+  await this.auditService.log({
+    action: 'UPDATE_TASK',
+    description: `Task ${task.title} atualizada`,
+    actorId,
+    organizationId: task.project.organizationId,
+  });
+
+  return updatedTask;
 }
 
 }
