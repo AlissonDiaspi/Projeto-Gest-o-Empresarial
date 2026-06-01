@@ -1,4 +1,4 @@
-// projects/projects.service.ts
+
 import {
   Injectable,
   NotFoundException,
@@ -19,7 +19,7 @@ export class ProjectsService {
     createdById: string,
     name: string,
     description?: string,
-    teamId?: string,
+    teamIds?: string[],
     startDate?: string,
     endDate?: string,
   ) {
@@ -31,46 +31,66 @@ export class ProjectsService {
       throw new NotFoundException('Organization not found');
     }
 
-    const project = await this.prisma.project.create({
+   
+    const project = await this.prisma.project.create({ // método para criar um projeto
       data: {
         name,
         description,
         organizationId,
         createdById,
-        teamId,
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
       },
     });
 
-    await this.auditService.log({
+    
+    if (teamIds && teamIds.length > 0) { // adicionar times a um projeto 
+      await this.prisma.projectTeam.createMany({
+        data: teamIds.map(teamId => ({
+          projectId: project.id,
+          teamId,
+        })),
+      });
+    }
+
+    await this.auditService.log({ // retorna o log de que um projeto foi criado 
       action: 'CREATE_PROJECT',
       description: `Projeto ${name} criado`,
       actorId: createdById,
       organizationId,
     });
 
-    return project;
+    // Retornar o projeto com os times
+    return this.findById(organizationId, project.id);
   }
 
-  async findAllByOrganization(organizationId: string) {
-    return this.prisma.project.findMany({
+  async findAllByOrganization(organizationId: string) { // método para achar os projetos de uma empresa
+    const projects = await this.prisma.project.findMany({
       where: { organizationId },
       include: {
-        team: true,
+        projectTeams: {
+          include: {
+            team: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return projects.map(project => ({
+      ...project,
+      teams: project.projectTeams.map(pt => pt.team),
+    }));
   }
 
-  async update(
+  async update( // método para atualizar um projeto de uma empresa
     organizationId: string,
     projectId: string,
     actorId: string,
     data: {
       name?: string;
       description?: string;
-      teamId?: string;
+      teamIds?: string[];
       startDate?: string;
       endDate?: string;
     },
@@ -82,32 +102,50 @@ export class ProjectsService {
       },
     });
 
-    if (!project) {
+    if (!project) { // se não achar o projeto, lança esse erro
       throw new NotFoundException('Project not found');
     }
 
+    // atualizar dados básicos
     const updatedProject = await this.prisma.project.update({
       where: { id: projectId },
       data: {
         name: data.name,
         description: data.description,
-        teamId: data.teamId,
         startDate: data.startDate ? new Date(data.startDate) : null,
         endDate: data.endDate ? new Date(data.endDate) : null,
       },
     });
 
-    await this.auditService.log({
+    // atualizar times(é opcional)
+    if (data.teamIds !== undefined) {
+      // Remover times existentes
+      await this.prisma.projectTeam.deleteMany({
+        where: { projectId },
+      });
+      
+      // adicionar novos times
+      if (data.teamIds.length > 0) {
+        await this.prisma.projectTeam.createMany({
+          data: data.teamIds.map(teamId => ({
+            projectId,
+            teamId,
+          })),
+        });
+      }
+    }
+
+    await this.auditService.log({ // retorna para os logs as atualizações 
       action: 'UPDATE_PROJECT',
       description: `Projeto ${updatedProject.name} atualizado`,
       actorId,
       organizationId,
     });
 
-    return updatedProject;
+    return this.findById(organizationId, projectId);
   }
 
-  async remove(organizationId: string, projectId: string) {
+  async remove(organizationId: string, projectId: string) { // método para remover um projeto
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
@@ -115,54 +153,66 @@ export class ProjectsService {
       },
     });
 
-    if (!project) {
+    if (!project) { // se não encontrar, lança esse erro
       throw new NotFoundException('Project not found');
     }
 
-    // Usar transação para garantir consistência
+    // usar transação para garantir consistência
     return this.prisma.$transaction(async (prisma) => {
-      // 1. Deletar comentários das tasks
+      // 1. deletar relações project_teams
+      await prisma.projectTeam.deleteMany({
+        where: { projectId },
+      });
+
+      // 2. deletar comentários das tasks
       await prisma.taskComment.deleteMany({
         where: { task: { projectId } }
       });
 
-      // 2. Deletar tasks
+      // 3. deletar tasks
       await prisma.task.deleteMany({
         where: { projectId },
       });
 
-      // 3. Deletar mensagens do chat
+      // 4. deletar mensagens do chat
       await prisma.chatMessage.deleteMany({
         where: { projectId },
       });
 
-      // 4. Deletar arquivos
+      // 5. deletar arquivos
       await prisma.file.deleteMany({
         where: { projectId },
       });
 
-      // 5. Deletar o projeto
+      // 6. deletar o projeto
       return prisma.project.delete({
         where: { id: projectId },
       });
     });
   }
 
-  async findById(organizationId: string, projectId: string) {
+  async findById(organizationId: string, projectId: string) { // método para procurar um projeto pelo ID
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
         organizationId,
       },
       include: {
-        team: true,
+        projectTeams: {
+          include: {
+            team: true,
+          },
+        },
       },
     });
 
-    if (!project) {
+    if (!project) { // se não achar, lança o erro 
       throw new NotFoundException('Project not found');
     }
 
-    return project;
+    return {
+      ...project,
+      teams: project.projectTeams.map(pt => pt.team),
+    };
   }
 }

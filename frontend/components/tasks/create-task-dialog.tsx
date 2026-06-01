@@ -1,4 +1,4 @@
-// components/tasks/create-task-dialog.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -31,7 +31,7 @@ interface Props {
   onSuccess: () => void;
 }
 
-export function CreateTaskDialog({ open, onOpenChange, projectId, onSuccess }: Props) {
+export function CreateTaskDialog({ open, onOpenChange, projectId, onSuccess }: Props) { // função para criar uma task no frontend
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('MEDIUM');

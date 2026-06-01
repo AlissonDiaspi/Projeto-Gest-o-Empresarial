@@ -1,4 +1,4 @@
-// components/kanban/task-card.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -31,7 +31,7 @@ interface TaskCardProps {
   onTaskUpdated: () => void;
 }
 
-export function TaskCard({ task, projectId, onTaskUpdated }: TaskCardProps) {
+export function TaskCard({ task, projectId, onTaskUpdated }: TaskCardProps) { // cartão das tasks com informações pertinentes sobre a mesma 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [loading, setLoading] = useState(false);

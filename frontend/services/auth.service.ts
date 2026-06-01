@@ -1,6 +1,6 @@
 import { api } from '@/lib/axios';
 
-export async function login(
+export async function login( // método para pegar os endpoints da parte de autenticação no backend 
   email: string,
 
   password: string,

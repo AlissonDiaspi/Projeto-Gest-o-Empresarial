@@ -1,4 +1,4 @@
-// components/teams/team-dialog.tsx (versão com edição)
+
 'use client';
 
 import { useState, useEffect } from 'react';

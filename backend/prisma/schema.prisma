@@ -82,17 +82,28 @@ model Project {
   description      String?
   organizationId   String
   createdById      String
-  teamId           String?
-  startDate        DateTime?        // ADICIONADO
-  endDate          DateTime?        // ADICIONADO
+  startDate        DateTime?
+  endDate          DateTime?
   organization     Organization     @relation(fields: [organizationId], references: [id])
   createdBy        User             @relation(fields: [createdById], references: [id])
-  team             Team?            @relation(fields: [teamId], references: [id])
   tasks            Task[]
   chatMessages     ChatMessage[]
   files            File[]
+  projectTeams     ProjectTeam[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+}
+
+model ProjectTeam {
+  id        String   @id @default(uuid())
+  projectId String
+  teamId    String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, teamId])
+  @@map("project_teams")
 }
 
 model Task {
@@ -163,7 +174,7 @@ model Team {
   organizationId   String
   organization     Organization     @relation(fields: [organizationId], references: [id])
   members          TeamMember[]
-  projects         Project[]
+  projectTeams     ProjectTeam[]
   createdAt        DateTime         @default(now())
 }
 

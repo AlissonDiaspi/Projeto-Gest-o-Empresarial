@@ -1,4 +1,4 @@
-// backend/src/files/files.controller.ts
+
 import {
   Controller,
   Post,
@@ -31,7 +31,7 @@ export class FilesController {
   @UseGuards(JwtAuthGuard)
   @Post('upload')
   @UseInterceptors(
-    FileInterceptor('file', {
+    FileInterceptor('file', { 
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {
@@ -42,7 +42,7 @@ export class FilesController {
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
-  async uploadFile(
+  async uploadFile(// endpoint para envio dos arquivos/imagens
     @UploadedFile() file: Express.Multer.File,
     @Req() req: any,
     @Body('projectId') projectId?: string,
@@ -62,14 +62,14 @@ export class FilesController {
 
   @UseGuards(JwtAuthGuard)
   @Get('project/:projectId')
-  async getProjectFiles(@Param('projectId') projectId: string) {
+  async getProjectFiles(@Param('projectId') projectId: string) { // endpoint para retornar os arquivos de um projeto
     const files = await this.filesService.getProjectFiles(projectId);
     return { success: true, data: files };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id/download')
-  async downloadFile(@Param('id') id: string, @Res() res: Response) {
+  async downloadFile(@Param('id') id: string, @Res() res: Response) { // endpoint para baixar um arquivo
     const file = await this.filesService.getFile(id);
     const encodedFileName = encodeURIComponent(file.originalName);
     
@@ -82,7 +82,7 @@ export class FilesController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteFile(@Param('id') id: string) {
+  async deleteFile(@Param('id') id: string) { // endpoint para deletar um arquivo
     await this.filesService.deleteFile(id);
     return { success: true, message: 'File deleted successfully' };
   }

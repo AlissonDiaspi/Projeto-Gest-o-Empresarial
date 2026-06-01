@@ -84,4 +84,9 @@ export class NotificationsService {
       },
     });
   }
+  async deleteAllByUser(userId: string) { // método para deletar as notificações de um projeto 
+  return this.prisma.notification.deleteMany({
+    where: { userId },
+  });
+}
 }

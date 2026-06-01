@@ -1,4 +1,4 @@
-// backend/src/files/files.service.ts
+
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { unlink } from 'fs/promises';
@@ -8,7 +8,7 @@ import { existsSync } from 'fs';
 export class FilesService {
   constructor(private prisma: PrismaService) {}
 
-  async saveFile(data: {
+  async saveFile(data: { // método para salvar um arquivo dentro de um projeto
     originalName: string;
     fileName: string;
     path: string;
@@ -39,7 +39,7 @@ export class FilesService {
     });
   }
 
-  async getProjectFiles(projectId: string) {
+  async getProjectFiles(projectId: string) { // método para retornar os arquivos de um projeto
     return this.prisma.file.findMany({
       where: { projectId },
       include: {

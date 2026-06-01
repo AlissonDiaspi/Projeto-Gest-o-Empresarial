@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -176,4 +177,74 @@ export class OrganizationsService {
       },
     });
   }
+
+  async update(id: string, name: string, actorId: string) { // método para mudar o nome de uma organização 
+  const organization = await this.prisma.organization.findUnique({
+    where: { id },
+  });
+
+  if (!organization) {
+    throw new NotFoundException('Organization not found');
+  }
+
+  const updated = await this.prisma.organization.update({
+    where: { id },
+    data: { name },
+  });
+
+  await this.auditService.log({
+    action: 'UPDATE_ORGANIZATION',
+    description: `Organização ${name} atualizada`,
+    actorId,
+    organizationId: id,
+  });
+
+  return updated;
+}
+
+async remove(id: string, actorId: string) { // método para deletar uma organização 
+  const organization = await this.prisma.organization.findUnique({ 
+    where: { id },
+  });
+
+  if (!organization) {
+    throw new NotFoundException('Organization not found');
+  }
+
+  // Verificar se o usuário é o owner
+  const membership = await this.prisma.membership.findFirst({
+    where: {
+      userId: actorId,
+      organizationId: id,
+      role: 'OWNER',
+    },
+  });
+
+  if (!membership) {
+    throw new ForbiddenException('Only owner can delete organization');
+  }
+
+  // Deletar todos os dados relacionados
+  await this.prisma.$transaction(async (prisma) => {
+    // Deletar membros
+    await prisma.membership.deleteMany({ where: { organizationId: id } });
+    // Deletar audit logs
+    await prisma.auditLog.deleteMany({ where: { organizationId: id } });
+    // Deletar projetos (e suas dependências)
+    const projects = await prisma.project.findMany({ where: { organizationId: id } });
+    for (const project of projects) {
+      await prisma.taskComment.deleteMany({ where: { task: { projectId: project.id } } });
+      await prisma.task.deleteMany({ where: { projectId: project.id } });
+      await prisma.chatMessage.deleteMany({ where: { projectId: project.id } });
+      await prisma.file.deleteMany({ where: { projectId: project.id } });
+      await prisma.project.delete({ where: { id: project.id } });
+    }
+    // Deletar times
+    await prisma.team.deleteMany({ where: { organizationId: id } });
+    // Deletar organização
+    await prisma.organization.delete({ where: { id } });
+  });
+
+  return { message: 'Organization deleted successfully' };
+}
 }

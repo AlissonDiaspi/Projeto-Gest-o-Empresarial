@@ -17,7 +17,7 @@ export interface DashboardStats {
   weeklyProductivity: number[];
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
+export async function getDashboardStats(): Promise<DashboardStats> { // função responsável por pegar os dados da parte do dashboard no backend
   const [projects, tasks, teams] =
     await Promise.all([
       getProjects(),

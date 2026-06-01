@@ -1,4 +1,4 @@
-// app/auth/login/page.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-export default function LoginPage() {
+export default function LoginPage() { // pagina para autenticação com jwt na aplicação 
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +26,7 @@ export default function LoginPage() {
     try {
       setLoading(true);
       
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password }); // chama o endpoint do backend
       
       console.log('Resposta:', response.data);
       

@@ -1,4 +1,3 @@
-// hooks/use-chat.ts
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
@@ -29,7 +28,6 @@ export function useChat({ projectId }: UseChatProps) {
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [isConnected, setIsConnected] = useState(false);
   const { user } = useAuth();
-  // CORRIGIDO: usar number para timeout do browser
   const typingTimeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -40,14 +38,12 @@ export function useChat({ projectId }: UseChatProps) {
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected');
       setIsConnected(true);
       newSocket.emit('user-online', user.id);
       newSocket.emit('join-project', { projectId, userId: user.id });
     });
 
     newSocket.on('disconnect', () => {
-      console.log('Socket disconnected');
       setIsConnected(false);
     });
 

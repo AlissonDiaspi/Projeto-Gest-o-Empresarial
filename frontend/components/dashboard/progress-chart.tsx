@@ -1,4 +1,4 @@
-// components/dashboard/progress-chart.tsx
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

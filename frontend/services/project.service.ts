@@ -6,17 +6,19 @@ export interface Project {
   name: string;
   description?: string;
   organizationId: string;
-  teamId?: string;
+  teams?: Team[];
   startDate?: string;
   endDate?: string;
-  team?: {
-    id: string;
-    name: string;
-  };
   createdById: string;
   createdAt: string;
   updatedAt?: string;
 }
+
+export interface Team {
+  id: string;
+  name: string;
+  description?: string;
+} // classe reponsável por pegar todos os endpoints do backend relacionados a projetos
 
 export async function getProjects(organizationId: string): Promise<Project[]> {
   const response = await api.get(`/organizations/${organizationId}/projects`);
@@ -33,7 +35,7 @@ export async function createProject(
   data: {
     name: string;
     description?: string;
-    teamId?: string;
+    teamIds?: string[];
     startDate?: string;
     endDate?: string;
   },
@@ -48,7 +50,7 @@ export async function updateProject(
   data: {
     name?: string;
     description?: string;
-    teamId?: string;
+    teamIds?: string[];
     startDate?: string;
     endDate?: string;
   },

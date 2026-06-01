@@ -1,4 +1,4 @@
-// teams/teams.service.ts
+
 import {
   Injectable,
   NotFoundException,
@@ -15,7 +15,7 @@ import { UpdateTeamDto } from './dto/update-team.dto';
 export class TeamsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createTeamDto: CreateTeamDto) {
+  async create(createTeamDto: CreateTeamDto) { // função para criar um time 
     return this.prisma.team.create({
       data: createTeamDto,
       include: {
@@ -28,7 +28,7 @@ export class TeamsService {
     });
   }
 
-  async findAll(organizationId: string) {
+  async findAll(organizationId: string) { // método para mostrar todos os times de uma organização
     return this.prisma.team.findMany({
       where: { organizationId },
       include: {
@@ -37,17 +37,27 @@ export class TeamsService {
             user: true,
           },
         },
+        projectTeams: {
+          include: {
+            project: true,
+          },
+        },
       },
     });
   }
 
-  async findOne(teamId: string) {
+  async findOne(teamId: string) { // método para achar apenas um time 
     const team = await this.prisma.team.findUnique({
       where: { id: teamId },
       include: {
         members: {
           include: {
             user: true,
+          },
+        },
+        projectTeams: {
+          include: {
+            project: true,
           },
         },
       },
@@ -57,10 +67,13 @@ export class TeamsService {
       throw new NotFoundException(`Team with ID ${teamId} not found`);
     }
 
-    return team;
+    return {
+      ...team,
+      projects: team.projectTeams.map(pt => pt.project),
+    };
   }
 
-  async update(teamId: string, updateTeamDto: UpdateTeamDto) {
+  async update(teamId: string, updateTeamDto: UpdateTeamDto) { // método para atualizar um time 
     await this.findOne(teamId);
 
     return this.prisma.team.update({
@@ -76,16 +89,16 @@ export class TeamsService {
     });
   }
 
-  async remove(teamId: string) {
-    const projectCount = await this.prisma.project.count({
-      where: {
-        teamId: teamId,
-      },
+  async remove(teamId: string) { // método para remover um time 
+    
+    const projectTeams = await this.prisma.projectTeam.findMany({
+      where: { teamId },
+      select: { projectId: true },
     });
 
-    if (projectCount > 0) {
+    if (projectTeams.length > 0) {
       throw new BadRequestException(
-        `Cannot delete team with ${projectCount} project(s). Remove or reassign projects first.`,
+        `Cannot delete team with ${projectTeams.length} project(s). Remove or reassign projects first.`,
       );
     }
 
@@ -108,32 +121,28 @@ export class TeamsService {
     return this.findAll(organizationId);
   }
 
-  // MÉTODO ADD MEMBER CORRIGIDO COM TRATAMENTO DE ERRO
-  async addMember(teamId: string, userId: string) {
+  async addMember(teamId: string, userId: string) { // método para adicionar um membro da organização ao time
     try {
       console.log(`[TeamsService] addMember chamado: teamId=${teamId}, userId=${userId}`);
       
-      // Verificar se o time existe
       const team = await this.prisma.team.findUnique({
         where: { id: teamId },
       });
 
-      if (!team) {
+      if (!team) { // procura se o time existe 
         console.log(`[TeamsService] Time não encontrado: ${teamId}`);
         throw new NotFoundException(`Team with ID ${teamId} not found`);
       }
 
-      // Verificar se o usuário existe
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
       });
 
-      if (!user) {
+      if (!user) { // procura o usuário 
         console.log(`[TeamsService] Usuário não encontrado: ${userId}`);
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
-      // Verificar se já é membro
       const alreadyMember = await this.prisma.teamMember.findUnique({
         where: {
           teamId_userId: {
@@ -143,12 +152,11 @@ export class TeamsService {
         },
       });
 
-      if (alreadyMember) {
+      if (alreadyMember) { // procura se ele ja pertence ao time 
         console.log(`[TeamsService] Usuário já é membro do time: ${userId}`);
         throw new ConflictException('User already in team');
       }
 
-      // Adicionar membro
       const teamMember = await this.prisma.teamMember.create({
         data: {
           teamId,
@@ -179,7 +187,7 @@ export class TeamsService {
     }
   }
 
-  async removeMember(teamId: string, userId: string) {
+  async removeMember(teamId: string, userId: string) { // método para remover um usuário de um time 
     try {
       console.log(`[TeamsService] removeMember chamado: teamId=${teamId}, userId=${userId}`);
       
@@ -194,7 +202,7 @@ export class TeamsService {
         },
       });
 
-      if (!member) {
+      if (!member) { // procura se o usuário pertence ao time 
         throw new NotFoundException('Member not found in this team');
       }
 
@@ -215,7 +223,7 @@ export class TeamsService {
     }
   }
 
-  async getMembers(teamId: string) {
+  async getMembers(teamId: string) { // método para encontrar os membros de um time 
     await this.findOne(teamId);
 
     const members = await this.prisma.teamMember.findMany({

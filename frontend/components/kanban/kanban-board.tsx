@@ -1,4 +1,4 @@
-// components/kanban/kanban-board.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,7 +26,7 @@ const columnsConfig = {
   DONE: { title: 'Concluído', color: 'bg-green-50' },
 };
 
-export function KanbanBoard({ tasks, projectId, onTaskUpdate }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, projectId, onTaskUpdate }: KanbanBoardProps) { // board do kanban para as tasks 
   const [columns, setColumns] = useState<Record<string, Column>>({
     TODO: {
       id: 'TODO',

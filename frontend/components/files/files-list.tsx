@@ -1,4 +1,4 @@
-// frontend/components/files/files-list.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,7 +26,7 @@ interface FilesListProps {
   refreshTrigger?: number;
 }
 
-export function FilesList({ projectId, refreshTrigger = 0 }: FilesListProps) {
+export function FilesList({ projectId, refreshTrigger = 0 }: FilesListProps) { // lista de todos os arquivos de um projeto 
   const [files, setFiles] = useState<FileData[]>([]);
   const [loading, setLoading] = useState(true);
   const [fileToDelete, setFileToDelete] = useState<FileData | null>(null);

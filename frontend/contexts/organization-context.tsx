@@ -1,4 +1,4 @@
-// contexts/organization-context.tsx
+
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';

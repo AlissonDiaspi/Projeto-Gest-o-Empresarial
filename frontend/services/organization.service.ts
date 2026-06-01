@@ -4,7 +4,7 @@ export interface Organization {
   id: string;
   name: string;
   createdAt: string;
-}
+} // classe responsável por pegar todos os endpoints do backend relacionados as organizações
 
 export async function getOrganizations(): Promise<Organization[]> {
   const response =

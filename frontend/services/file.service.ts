@@ -1,7 +1,6 @@
-// frontend/services/file.service.ts
 import { api } from '@/lib/axios';
 
-export interface FileData {
+export interface FileData { // classe responsável por pegar tudo de arquivos do backend para o frontend
   id: string;
   originalName: string;
   fileName: string;
@@ -32,24 +31,18 @@ export async function uploadFile(file: File, projectId: string): Promise<FileDat
 
 export async function getProjectFiles(projectId: string): Promise<FileData[]> {
   try {
-    console.log('Buscando arquivos para projeto:', projectId);
     const response = await api.get(`/files/project/${projectId}`);
     
-    // CORRIGIDO: A estrutura é response.data.data.data
     let files = [];
     
     if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
       files = response.data.data.data;
-      console.log('Extraído de response.data.data.data');
     } else if (response.data?.data && Array.isArray(response.data.data)) {
       files = response.data.data;
-      console.log('Extraído de response.data.data');
     } else if (Array.isArray(response.data)) {
       files = response.data;
-      console.log('Extraído de response.data');
     }
     
-    console.log('Arquivos encontrados:', files.length);
     return files;
   } catch (error) {
     console.error('Erro ao buscar arquivos:', error);
@@ -76,8 +69,6 @@ export async function downloadFile(fileId: string, originalName: string): Promis
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
-    
-    console.log('Download concluído:', originalName);
   } catch (error) {
     console.error('Erro no download:', error);
     throw error;

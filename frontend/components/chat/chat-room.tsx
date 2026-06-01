@@ -1,4 +1,4 @@
-// components/chat/chat-room.tsx
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -12,12 +12,12 @@ import { useAuth } from '@/hooks/use-auth';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-interface ChatRoomProps {
+interface ChatRoomProps { 
   projectId: string;
   projectName: string;
 }
 
-export function ChatRoom({ projectId, projectName }: ChatRoomProps) {
+export function ChatRoom({ projectId, projectName }: ChatRoomProps) { // méttodo para o chat realtime
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
   const { messages, onlineUsers, typingUsers, isConnected, sendMessage, handleTyping } = useChat({ projectId });
@@ -28,13 +28,13 @@ export function ChatRoom({ projectId, projectName }: ChatRoomProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = () => { // para mandar a mensagem 
     if (!newMessage.trim()) return;
     sendMessage(newMessage);
     setNewMessage('');
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => { // para mostrar que o usuário está digitando 
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();

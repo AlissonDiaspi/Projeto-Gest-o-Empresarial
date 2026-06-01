@@ -1,4 +1,4 @@
-// frontend/components/files/file-uploader.tsx
+
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
@@ -13,7 +13,7 @@ interface FileUploaderProps {
   onUploadComplete: () => void;
 }
 
-export function FileUploader({ projectId, onUploadComplete }: FileUploaderProps) {
+export function FileUploader({ projectId, onUploadComplete }: FileUploaderProps) { // parte do frontend que chama a service de files com os endpoints de arquivos 
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);

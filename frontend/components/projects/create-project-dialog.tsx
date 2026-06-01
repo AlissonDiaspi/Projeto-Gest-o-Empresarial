@@ -1,4 +1,4 @@
-// components/projects/create-project-dialog.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,17 +13,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, X } from 'lucide-react';
 import { createProject } from '@/services/project.service';
 import { getTeams, Team } from '@/services/team.service';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 interface Props {
   onCreated: () => void;
@@ -33,7 +27,7 @@ export function CreateProjectDialog({ onCreated }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedTeamId, setSelectedTeamId] = useState('none'); // Mudado para 'none'
+  const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [teams, setTeams] = useState<Team[]>([]);
@@ -55,11 +49,21 @@ export function CreateProjectDialog({ onCreated }: Props) {
       loadTeams();
       setName('');
       setDescription('');
-      setSelectedTeamId('none');
+      setSelectedTeamIds([]);
       setStartDate('');
       setEndDate('');
     }
   }, [open]);
+
+  const handleAddTeam = (teamId: string) => {
+    if (!selectedTeamIds.includes(teamId)) {
+      setSelectedTeamIds([...selectedTeamIds, teamId]);
+    }
+  };
+
+  const handleRemoveTeam = (teamId: string) => {
+    setSelectedTeamIds(selectedTeamIds.filter(id => id !== teamId));
+  };
 
   async function handleCreate() {
     const organizationId = localStorage.getItem('active_organization_id');
@@ -70,7 +74,7 @@ export function CreateProjectDialog({ onCreated }: Props) {
       await createProject(organizationId, {
         name,
         description: description || undefined,
-        teamId: selectedTeamId !== 'none' ? selectedTeamId : undefined,
+        teamIds: selectedTeamIds.length > 0 ? selectedTeamIds : undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
       });
@@ -84,9 +88,9 @@ export function CreateProjectDialog({ onCreated }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button>+ Novo Projeto</Button></DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader><DialogTitle>Criar Projeto</DialogTitle></DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
           <div className="space-y-2">
             <Label>Nome *</Label>
             <Input placeholder="Nome do projeto" value={name} onChange={(e) => setName(e.target.value)} disabled={loading} />
@@ -98,16 +102,32 @@ export function CreateProjectDialog({ onCreated }: Props) {
           </div>
           
           <div className="space-y-2">
-            <Label>Time</Label>
-            <Select value={selectedTeamId} onValueChange={setSelectedTeamId} disabled={loading || loadingTeams}>
-              <SelectTrigger><SelectValue placeholder="Selecione um time" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Sem time</SelectItem>
-                {teams.map((team) => (
-                  <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Times do Projeto (pode selecionar vários)</Label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {selectedTeamIds.map(teamId => {
+                const team = teams.find(t => t.id === teamId);
+                return team ? (
+                  <Badge key={teamId} variant="secondary" className="gap-1">
+                    {team.name}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveTeam(teamId)} />
+                  </Badge>
+                ) : null;
+              })}
+            </div>
+            <select
+              className="w-full p-2 border rounded-md"
+              value=""
+              onChange={(e) => handleAddTeam(e.target.value)}
+              disabled={loading || loadingTeams}
+            >
+              <option value="">Selecione um time...</option>
+              {teams.filter(team => !selectedTeamIds.includes(team.id)).map((team) => (
+                <option key={team.id} value={team.id}>{team.name}</option>
+              ))}
+            </select>
+            {selectedTeamIds.length === 0 && (
+              <p className="text-xs text-muted-foreground">Nenhum time selecionado</p>
+            )}
           </div>
           
           <div className="grid grid-cols-2 gap-4">

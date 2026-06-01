@@ -1,11 +1,5 @@
-// projects/dto/create-project.dto.ts
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  IsDateString,
-} from 'class-validator';
+
+import { IsNotEmpty, IsOptional, IsString, IsUUID, IsDateString, IsArray } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
@@ -17,8 +11,9 @@ export class CreateProjectDto {
   description?: string;
 
   @IsOptional()
-  @IsUUID()
-  teamId?: string;
+  @IsArray()
+  @IsUUID('4', { each: true })
+  teamIds?: string[];
 
   @IsOptional()
   @IsDateString()

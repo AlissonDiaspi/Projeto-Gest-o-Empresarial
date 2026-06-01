@@ -1,3 +1,4 @@
+
 import {
   Controller,
   Get,
@@ -5,11 +6,11 @@ import {
   Param,
   Req,
   Post,
+  Delete,
   UseGuards,
 } from '@nestjs/common';
 
 import { NotificationsService } from './notifications.service';
-
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('notifications')
@@ -20,7 +21,7 @@ export class NotificationsController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findMyNotifications(  // endpoint  para o usuário encontrar suas notificações 
+  async findMyNotifications(  // endpoint para o usuário encontrar suas notificações 
     @Req() req: any,
   ) {
     return this.notificationsService.findByUser(
@@ -38,24 +39,28 @@ export class NotificationsController {
   ) {
     return this.notificationsService.markAsRead(
       notificationId,
-
       req.user.id,
     );
   }
 
   @UseGuards(JwtAuthGuard)
-@Post('test')
-async testNotification(
-  @Req() req: any,
-) {
-  return this.notificationsService.create(
-    req.user.id,
+  @Post('test')
+  async testNotification(
+    @Req() req: any,
+  ) {
+    return this.notificationsService.create(
+      req.user.id,
+      'Teste Notificação',
+      'funcionando!',
+    );
+  }
 
-    'Teste realtime',
-
-    'WebSocket funcionando 🔥',
-  );
-}
-
- 
+  
+  @UseGuards(JwtAuthGuard)
+  @Delete()
+  async deleteAllNotifications( // endpoint para limpar as notificações!
+    @Req() req: any,
+  ) {
+    return this.notificationsService.deleteAllByUser(req.user.id);
+  }
 }

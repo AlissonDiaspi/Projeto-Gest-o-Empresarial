@@ -7,6 +7,7 @@ import {
   Patch,
   UseGuards,
   Delete,
+  Param,
   Query,
 } from '@nestjs/common';
 
@@ -29,6 +30,8 @@ import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { AuditService } from 'src/audit/audit.service';
 
 import { CurrentOrganization } from '../common/decorators/current-organization.decorator';
+
+import { UpdateOrganizationDto } from './dto/update-organization.dto';
 
 @Controller('organizations')
 export class OrganizationsController {
@@ -59,6 +62,30 @@ export class OrganizationsController {
       req.user.id,
     );
   }
+
+   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.OWNER, Role.ADMIN)
+  @Patch(':organizationId')
+  async update( //endpoint para alterar o nome de uma organização
+    @Param('organizationId') organizationId: string,
+    @Body() body: UpdateOrganizationDto,
+    @Req() req: any,
+  ) {
+    return this.organizationsService.update(organizationId, body.name, req.user.id);
+  }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.OWNER)
+  @Delete(':organizationId')
+  async remove( // endpoint para deletar uma organização
+    @Param('organizationId') organizationId: string,
+    @Req() req: any,
+  ) {
+    return this.organizationsService.remove(organizationId, req.user.id);
+  }
+
+
+
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.OWNER)

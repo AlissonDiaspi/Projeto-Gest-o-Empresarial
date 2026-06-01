@@ -1,4 +1,4 @@
-// hooks/use-organization.ts
+
 'use client';
 
 import { useContext } from 'react';

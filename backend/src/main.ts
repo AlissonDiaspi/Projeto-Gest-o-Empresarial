@@ -16,11 +16,11 @@ import {
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // 🔥 ADICIONADO: Configuração de CORS para liberar o Frontend na porta 3001
+  
   app.enableCors({
-    origin: ['http://localhost:3001'], // URL exata do seu Next.js
+    origin: ['http://localhost:3001'], 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // Obrigatório para o Axios com withCredentials ler os cookies/tokens
+    credentials: true, 
   });
 
   app.useGlobalInterceptors(

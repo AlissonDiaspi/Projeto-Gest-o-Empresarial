@@ -24,12 +24,12 @@ export class TeamsController {
   constructor(private readonly teamsService: TeamsService) {}
 
   @Post()
-  create(@Body() createTeamDto: CreateTeamDto) {
+  create(@Body() createTeamDto: CreateTeamDto) { // endpoint para criar um time 
     return this.teamsService.create(createTeamDto);
   }
 
   @Get('organization/:organizationId')
-  findByOrganization(@Param('organizationId', ParseUUIDPipe) organizationId: string) {
+  findByOrganization(@Param('organizationId', ParseUUIDPipe) organizationId: string) { // endpoint para achar um time
     return this.teamsService.findByOrganization(organizationId);
   }
 
@@ -39,7 +39,7 @@ export class TeamsController {
   }
 
   @Patch(':id')
-  update(
+  update( // endpoint para atualizar um time 
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTeamDto: UpdateTeamDto,
   ) {
@@ -48,12 +48,12 @@ export class TeamsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) { // endpoint para remover um time 
     await this.teamsService.remove(id);
   }
 
   @Post(':teamId/members')
-  addMember(
+  addMember( //endpooint para adicionar um membro em um time 
     @Param('teamId', ParseUUIDPipe) teamId: string,
     @Body() addTeamMemberDto: AddTeamMemberDto,
   ) {
@@ -62,7 +62,7 @@ export class TeamsController {
 
   @Delete(':teamId/members/:userId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeMember(
+  async removeMember( // endpoint para remover um membro de um time 
     @Param('teamId', ParseUUIDPipe) teamId: string,
     @Param('userId', ParseUUIDPipe) userId: string,
   ) {
@@ -70,7 +70,7 @@ export class TeamsController {
   }
 
   @Get(':teamId/members')
-  getMembers(@Param('teamId', ParseUUIDPipe) teamId: string) {
+  getMembers(@Param('teamId', ParseUUIDPipe) teamId: string) { // endpoint para retornar os membros de um time 
     return this.teamsService.getMembers(teamId);
   }
 }

@@ -30,28 +30,21 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const AuthContext =
-  createContext<AuthContextType>(
-    {} as AuthContextType,
-  );
+const AuthContext = createContext<AuthContextType>(
+  {} as AuthContextType,
+);
 
-export function AuthProvider({
+export function AuthProvider({ // função que irá validar o usuário na parte de login e validar as requisições dele com o jwt token
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] =
-    useState<User | null>(null);
-
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadUser() {
-      const token =
-        localStorage.getItem(
-          'access_token',
-        );
+      const token = localStorage.getItem('access_token');
 
       if (!token) {
         setIsLoading(false);
@@ -59,12 +52,8 @@ export function AuthProvider({
       }
 
       try {
-        const response =
-          await api.get('/auth/me');
-
-        console.log('Auth/me response:', response.data);
+        const response = await api.get('/auth/me');
         
-        // Tenta diferentes estruturas
         let userData = null;
         if (response.data?.data) {
           userData = response.data.data;
@@ -76,15 +65,7 @@ export function AuthProvider({
         
         setUser(userData);
       } catch (error) {
-        console.error(
-          'Erro ao recuperar sessão:',
-          error,
-        );
-
-        localStorage.removeItem(
-          'access_token',
-        );
-
+        localStorage.removeItem('access_token');
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -101,52 +82,26 @@ export function AuthProvider({
     setIsLoading(true);
 
     try {
-      const response =
-        await api.post(
-          '/auth/login',
-          {
-            email,
-            password,
-          },
-        );
-
-      console.log('LOGIN RESPONSE COMPLETA:', response.data);
+      const response = await api.post('/auth/login', { email, password });
       
-      // Tenta diferentes estruturas para o token
       let token = null;
       
       if (response.data?.data?.access_token) {
         token = response.data.data.access_token;
-        console.log('Token em response.data.data.access_token');
       } else if (response.data?.access_token) {
         token = response.data.access_token;
-        console.log('Token em response.data.access_token');
       } else if (response.data?.token) {
         token = response.data.token;
-        console.log('Token em response.data.token');
       }
 
       if (!token) {
-        console.error('Estrutura da resposta:', JSON.stringify(response.data, null, 2));
-        throw new Error(
-          'Token não retornado pelo backend',
-        );
+        throw new Error('Token não retornado pelo backend');
       }
 
-      console.log('Token obtido com sucesso:', token.substring(0, 50) + '...');
+      localStorage.setItem('access_token', token);
 
-      localStorage.setItem(
-        'access_token',
-        token,
-      );
-
-      // Buscar dados do usuário
-      const meResponse =
-        await api.get('/auth/me');
-
-      console.log('ME Response:', meResponse.data);
+      const meResponse = await api.get('/auth/me');
       
-      // Tenta diferentes estruturas para o usuário
       let userData = null;
       if (meResponse.data?.data) {
         userData = meResponse.data.data;
@@ -157,15 +112,8 @@ export function AuthProvider({
       }
       
       setUser(userData);
-
-      // Redirecionar
       window.location.href = '/';
     } catch (error) {
-      console.error(
-        'Erro no login:',
-        error,
-      );
-
       throw error;
     } finally {
       setIsLoading(false);
@@ -173,18 +121,10 @@ export function AuthProvider({
   }
 
   function logout() {
-    localStorage.removeItem(
-      'access_token',
-    );
-
-    localStorage.removeItem(
-      'active_organization_id',
-    );
-
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('active_organization_id');
     setUser(null);
-
-    window.location.href =
-      '/auth/login';
+    window.location.href = '/auth/login';
   }
 
   return (
@@ -192,8 +132,7 @@ export function AuthProvider({
       value={{
         user,
         isLoading,
-        isAuthenticated:
-          !!user,
+        isAuthenticated: !!user,
         login,
         logout,
       }}
@@ -204,7 +143,5 @@ export function AuthProvider({
 }
 
 export function useAuth() {
-  return useContext(
-    AuthContext,
-  );
+  return useContext(AuthContext);
 }

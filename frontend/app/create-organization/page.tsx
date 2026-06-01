@@ -11,7 +11,7 @@ import {
   createOrganization,
 } from '@/services/organization.service';
 
-export default function CreateOrganizationPage() {
+export default function CreateOrganizationPage() { // pagina para criação de uma nova organização 
   const router = useRouter();
 
   const [name, setName] =

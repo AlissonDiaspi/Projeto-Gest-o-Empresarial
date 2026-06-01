@@ -1,4 +1,4 @@
-// services/task.service.ts
+
 import { api } from '@/lib/axios';
 
 export interface Task {
@@ -14,7 +14,7 @@ export interface Task {
     name: string;
     email: string;
   };
-}
+} // classe responsável por pegar todos os endpoints do backend relacionado as tasks 
 
 export async function getTasks(projectId: string): Promise<Task[]> {
   const response = await api.get(`/projects/${projectId}/tasks`);

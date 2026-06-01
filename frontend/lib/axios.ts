@@ -7,28 +7,15 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
-      const token =
-        localStorage.getItem('access_token');
-
-      const activeOrganization =
-        localStorage.getItem(
-          'active_organization_id',
-        );
-
-      console.log(
-        'TOKEN ENVIADO:',
-        token,
-      );
+      const token = localStorage.getItem('access_token');
+      const activeOrganization = localStorage.getItem('active_organization_id');
 
       if (token) {
-        config.headers.Authorization =
-          `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
       }
 
       if (activeOrganization) {
-        config.headers[
-          'x-organization-id'
-        ] = activeOrganization;
+        config.headers['x-organization-id'] = activeOrganization;
       }
     }
 

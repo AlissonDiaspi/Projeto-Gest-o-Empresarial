@@ -1,4 +1,4 @@
-// chat/chat.gateway.ts - Versão ajustada
+
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -31,7 +31,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(socket: Socket) {
     console.log('Socket desconectado:', socket.id);
 
-    // Remover usuário de todos os projetos
+    // remover usuário de todos os projetos
     for (const [projectId, users] of this.projectUsers.entries()) {
       for (const [userId, socketId] of this.onlineUsers.entries()) {
         if (socketId === socket.id && users.has(userId)) {
@@ -42,7 +42,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }
 
-    // Remover do mapa de usuários online
+    // remover do mapa de usuários online
     for (const [userId, socketId] of this.onlineUsers.entries()) {
       if (socketId === socket.id) {
         this.onlineUsers.delete(userId);
@@ -72,13 +72,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.data.userId = data.userId;
     socket.data.projectId = data.projectId;
 
-    // Adicionar ao mapa do projeto
+    // adicionar ao mapa do projeto
     if (!this.projectUsers.has(data.projectId)) {
       this.projectUsers.set(data.projectId, new Set());
     }
     this.projectUsers.get(data.projectId)?.add(data.userId);
 
-    // Enviar histórico de mensagens
+    // enviar histórico de mensagens
     const messages = await this.chatService.getMessages(data.projectId);
     socket.emit('messages-history', messages);
 

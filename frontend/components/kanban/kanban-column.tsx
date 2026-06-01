@@ -1,19 +1,19 @@
-// components/kanban/kanban-column.tsx
+
 import { Task } from '@/services/task.service';
 import { TaskCard } from './task-card';
 
 interface Props {
   title: string;
   tasks: Task[];
-  projectId: string;  // Adicionar
-  onTaskUpdated: () => void;  // Adicionar
+  projectId: string;  
+  onTaskUpdated: () => void;  
 }
 
 export function KanbanColumn({
   title,
   tasks,
-  projectId,  // Adicionar
-  onTaskUpdated,  // Adicionar
+  projectId,  
+  onTaskUpdated, 
 }: Props) {
   return (
     <div className="flex-1 rounded-xl border bg-card p-4">
@@ -26,8 +26,8 @@ export function KanbanColumn({
           <TaskCard
             key={task.id}
             task={task}
-            projectId={projectId}  // Passar para o TaskCard
-            onTaskUpdated={onTaskUpdated}  // Passar para o TaskCard
+            projectId={projectId}  
+            onTaskUpdated={onTaskUpdated}  
           />
         ))}
       </div>

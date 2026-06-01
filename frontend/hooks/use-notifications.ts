@@ -1,4 +1,4 @@
-// hooks/use-notifications.ts
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -60,6 +60,19 @@ export function useNotifications() {
     }
   };
 
+  // Limpar todas as notificações
+  const clearAllNotifications = async () => {
+    try {
+      await api.delete('/notifications');
+      setNotifications([]);
+      setUnreadCount(0);
+      toast.success('Todas as notificações foram removidas');
+    } catch (error) {
+      console.error('Erro ao limpar notificações:', error);
+      toast.error('Erro ao limpar notificações');
+    }
+  };
+
   // Testar notificação
   const testNotification = async () => {
     try {
@@ -80,24 +93,18 @@ export function useNotifications() {
     });
 
     newSocket.on('connect', () => {
-      console.log('Notifications socket connected');
       setIsConnected(true);
       newSocket.emit('join', user.id);
     });
 
     newSocket.on('disconnect', () => {
-      console.log('Notifications socket disconnected');
       setIsConnected(false);
     });
 
     newSocket.on('notification', (notification: Notification) => {
-      console.log('Nova notificação recebida:', notification);
-      
-      // Adicionar à lista
       setNotifications(prev => [notification, ...prev]);
       setUnreadCount(prev => prev + 1);
       
-      // Mostrar toast
       toast.info(notification.title, {
         description: notification.message,
         duration: 5000,
@@ -118,6 +125,7 @@ export function useNotifications() {
     isConnected,
     markAsRead,
     markAllAsRead,
+    clearAllNotifications,
     loadNotifications,
     testNotification,
   };
